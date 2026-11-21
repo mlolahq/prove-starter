@@ -22,7 +22,7 @@ jobs:
       - name: Start the shop
         run: |
           npm start &
-          npx -y wait-on@8 http://127.0.0.1:3000/api/health
+          npx -y wait-on@8 --timeout 60000 http-get://127.0.0.1:3000/api/health   # a GET: this shop answers no HEAD
       - uses: mlolahq/prove-action@v1
         continue-on-error: true                   # seal decides
         with:
