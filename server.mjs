@@ -1,17 +1,23 @@
 // The shop: one page, a cart kept in memory, and the API behind it.
 import { createServer } from "node:http";
-import { subtotal } from "./src/price.mjs";
+import { discount, subtotal } from "./src/price.mjs";
 
 const cart = { items: [] };
 const total = () => subtotal(cart.items);
 
-const page = () => `<!doctype html>
+const esc = (s) => String(s).replace(/[&<>"']/g, (c) => `&#${c.charCodeAt(0)};`);
+
+const page = (code) => `<!doctype html>
 <html lang="en"><head><meta charset="utf-8"><title>Tiny shop</title></head>
 <body>
   <h1>Tiny shop</h1>
   <form method="post" action="/add"><button>Add a mug</button></form>
   <p>Items: ${cart.items.length}</p>
-  <p>Total: ${total()}</p>
+  <form method="get" action="/">
+    <label for="code">Discount code</label> <input id="code" name="code" value="${esc(code ?? "")}">
+    <button>Apply</button>
+  </form>
+  <p>Total: ${code ? discount(total(), code) : total()}</p>
 </body></html>`;
 
 const readBody = (req) => new Promise((done) => { let s = ""; req.on("data", (c) => (s += c)); req.on("end", () => done(new URLSearchParams(s))); });
@@ -20,7 +26,7 @@ const server = createServer(async (req, res) => {
   const url = new URL(req.url, "http://shop");
   if (req.method === "GET" && url.pathname === "/") {
     res.setHeader("content-type", "text/html; charset=utf-8");
-    return res.end(page());
+    return res.end(page(url.searchParams.get("code")));
   }
   if (req.method === "POST" && url.pathname === "/add") {
     await readBody(req);
