@@ -43,10 +43,12 @@ Download the `mlola-proof` artifact from a pull request's run, then:
 
 ```bash
 npx -y -p @mlola/browser-cli@0.19.0 mlola receipt check proof/CR-1/proof.json \
-  --contract contracts/CR-1.json --trust ed25519:KEY_ID --commit <the run's commit>
+  --contract contracts/CR-1.json --trust ed25519:c7c00864947eed06 --commit <the run's commit>
 ```
 
-No browser, network or model is needed. The check recomputes every verdict
+`ed25519:c7c00864947eed06` is this repository's sealing key; its public half is
+[`signing-key.pub.pem`](signing-key.pub.pem), and `--trust signing-key.pub.pem`
+works too. No browser, network or model is needed. The check recomputes every verdict
 from what the proof recorded, so an edited proof is caught.
 
 ## Try it
