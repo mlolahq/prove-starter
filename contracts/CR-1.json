@@ -1,0 +1,44 @@
+{
+  "format": "mlola.contract/1",
+  "id": "CR-1",
+  "title": "Shoppers can apply the code SAVE10 for 10% off",
+  "source": "docs/cr/CR-1.md",
+  "approvedBy": ["product owner"],
+  "risk": "medium",
+  "baseUrl": "http://127.0.0.1:3000",
+  "acceptance": [
+    {
+      "id": "AC-1",
+      "text": "SAVE10 takes 10% off the total",
+      "proof": { "layer": "test", "report": "../reports/junit.xml", "cases": ["discount > SAVE10 takes 10% off"], "files": ["../test/price.test.mjs"] }
+    },
+    {
+      "id": "AC-2",
+      "text": "An unknown code changes nothing",
+      "proof": { "layer": "test", "report": "../reports/junit.xml", "cases": ["discount > an unknown code changes nothing"], "files": ["../test/price.test.mjs"] }
+    },
+    {
+      "id": "AC-3",
+      "text": "Applying SAVE10 on the cart page shows the discounted total",
+      "proof": {
+        "layer": "browser",
+        "url": "/",
+        "steps": [{ "click": "Add a mug" }, { "fill": "Discount code", "with": "SAVE10" }, { "click": "Apply" }],
+        "expect": { "kind": "text_visible", "text": "Total: 90" }
+      }
+    },
+    {
+      "id": "AC-4",
+      "text": "The discount is kept on the cart, so checkout charges it",
+      "proof": { "layer": "api", "get": "/api/cart", "bodyContains": "\"total\":90" }
+    },
+    {
+      "id": "AC-5",
+      "text": "The brand team approves the wording",
+      "proof": { "layer": "manual", "how": "the brand team reviews the AC-3 screenshot" }
+    }
+  ],
+  "invariants": [
+    { "id": "INV-1", "text": "The shop answers", "proof": { "layer": "api", "get": "/api/health", "status": 200 } }
+  ]
+}

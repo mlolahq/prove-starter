@@ -1,0 +1,11 @@
+{
+  "name": "prove-starter",
+  "private": true,
+  "type": "module",
+  "description": "A tiny shop, one change request, and a proof on every pull request.",
+  "scripts": {
+    "start": "node server.mjs",
+    "test": "mkdir -p reports && node --test --test-reporter=spec --test-reporter-destination=stdout --test-reporter=junit --test-reporter-destination=reports/junit.xml test/*.test.mjs"
+  },
+  "engines": { "node": ">=22" }
+}

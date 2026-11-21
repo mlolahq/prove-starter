@@ -1,0 +1,41 @@
+# Proves every pull request against its approved contract (contracts/).
+# Two jobs: `prove` runs the change and holds no key; `seal` runs none of the
+# change's code, checks each proof again, signs it, comments, and is the gate.
+name: prove
+on: [pull_request]
+
+permissions:
+  contents: read
+
+jobs:
+  prove:                    # runs the change: no key here
+    runs-on: ubuntu-latest  # Google Chrome is preinstalled
+    steps:
+      - uses: actions/checkout@v4
+        with: { fetch-depth: 0 }                  # the base branch, to compare with
+      - uses: actions/setup-node@v4
+        with: { node-version: 22 }
+      # A real project runs `npm ci` here. This shop has no dependencies.
+      - name: Run the tests, as JUnit
+        run: npm test
+        continue-on-error: true                   # a failing test is a criterion that failed, in the proof
+      - name: Start the shop
+        run: |
+          npm start &
+          npx -y wait-on@8 http://127.0.0.1:3000/api/health
+      - uses: mlolahq/prove-action@v1
+        continue-on-error: true                   # seal decides
+        with:
+          comment: false                          # seal posts it
+
+  seal:                     # runs none of the change's code: the key is only here
+    needs: prove
+    if: ${{ !cancelled() }}
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pull-requests: write  # for the proof comment
+    env:
+      MLOLA_RECEIPT_KEY: ${{ secrets.MLOLA_RECEIPT_KEY }}   # optional: signs the proofs
+    steps:
+      - uses: mlolahq/prove-action/seal@v1
