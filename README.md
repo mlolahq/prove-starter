@@ -42,7 +42,7 @@ Why two jobs, and what a proof does and does not establish:
 Download the `mlola-proof` artifact from a pull request's run, then:
 
 ```bash
-npx -y -p @mlola/browser-cli@0.19.0 mlola receipt check proof/CR-1/proof.json \
+npx -y -p @mlola/browser-cli@0.20.0 mlola receipt check proof/CR-1/proof.json \
   --contract contracts/CR-1.json --trust ed25519:c7c00864947eed06 --commit <the run's commit>
 ```
 
@@ -59,14 +59,14 @@ from what the proof recorded, so an edited proof is caught.
 git checkout pr-2-fix         # or pr-1-first-attempt
 npm test                      # writes reports/junit.xml
 npm start &                   # the shop on http://127.0.0.1:3000
-npx -y -p @mlola/browser-cli@0.19.0 mlola prove contracts/CR-1.json --base main
+npx -y -p @mlola/browser-cli@0.20.0 mlola prove contracts/CR-1.json --base main
 ```
 
 **On a fork:** fork this repository, enable Actions on the fork (its Actions
 tab), and open a pull request in it from `pr-1-first-attempt` or
 `pr-2-fix` to `main`. Without a `MLOLA_RECEIPT_KEY` secret the proofs are
 checked and stay unsigned. To sign them, create a key
-(`npx -y -p @mlola/browser-cli@0.19.0 mlola receipt keygen`) and store its
+(`npx -y -p @mlola/browser-cli@0.20.0 mlola receipt keygen`) and store its
 private key as that secret.
 
 **On your own repository:** write a contract for your next change
