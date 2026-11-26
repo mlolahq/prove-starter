@@ -1,9 +1,12 @@
 // The shop: one page, a cart kept in memory, and the API behind it.
 import { createServer } from "node:http";
-import { subtotal } from "./src/price.mjs";
+import { discount, subtotal } from "./src/price.mjs";
 
-const cart = { items: [] };
-const total = () => subtotal(cart.items);
+// CR-1: the applied code is kept on the cart, so the API and checkout charge it.
+const cart = { items: [], code: null };
+const total = () => discount(subtotal(cart.items), cart.code);
+
+const esc = (s) => String(s).replace(/[&<>"']/g, (c) => `&#${c.charCodeAt(0)};`);
 
 const page = () => `<!doctype html>
 <html lang="en"><head><meta charset="utf-8"><title>Tiny shop</title></head>
@@ -11,6 +14,10 @@ const page = () => `<!doctype html>
   <h1>Tiny shop</h1>
   <form method="post" action="/add"><button>Add a mug</button></form>
   <p>Items: ${cart.items.length}</p>
+  <form method="post" action="/apply">
+    <label for="code">Discount code</label> <input id="code" name="code" value="${esc(cart.code ?? "")}">
+    <button>Apply</button>
+  </form>
   <p>Total: ${total()}</p>
 </body></html>`;
 
@@ -28,9 +35,15 @@ const server = createServer(async (req, res) => {
     res.writeHead(303, { location: "/" });
     return res.end();
   }
+  if (req.method === "POST" && url.pathname === "/apply") {
+    const code = (await readBody(req)).get("code")?.trim().toUpperCase() || null;
+    cart.code = code;
+    res.writeHead(303, { location: "/" });
+    return res.end();
+  }
   if (req.method === "GET" && url.pathname === "/api/cart") {
     res.setHeader("content-type", "application/json");
-    return res.end(JSON.stringify({ items: cart.items, total: total() }));
+    return res.end(JSON.stringify({ items: cart.items, code: cart.code, total: total() }));
   }
   if (req.method === "GET" && url.pathname === "/api/health") {
     res.setHeader("content-type", "application/json");
